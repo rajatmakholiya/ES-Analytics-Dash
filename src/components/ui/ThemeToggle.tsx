@@ -1,22 +1,21 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Moon, Sun } from "lucide-react"
-import { useTheme } from "next-themes"
+import * as React from "react";
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
 
 export function ThemeToggle() {
-  const { setTheme, resolvedTheme } = useTheme()
-  const [mounted, setMounted] = React.useState(false)
+  const { setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
 
-  // Prevent hydration mismatch by waiting for mount
   React.useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
   if (!mounted) {
     return (
       <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 animate-pulse" />
-    )
+    );
   }
 
   return (
@@ -31,5 +30,5 @@ export function ThemeToggle() {
       </div>
       <span className="sr-only">Toggle theme</span>
     </button>
-  )
+  );
 }
