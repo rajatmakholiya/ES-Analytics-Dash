@@ -75,7 +75,12 @@ export default function DashboardPage() {
 
       <div className="max-w-[95%] mx-auto px-4 py-8 space-y-6">
         {/* Headlines */}
-        <Headlines data={headlines} loading={loading} />
+        <Headlines 
+          data={headlines} 
+          loading={loading} 
+          rawData={rawData} 
+          mappedSessions={stats.sessions} 
+        />
 
         {/* Filters Bar */}
         <div className="bg-white dark:bg-gray-900 p-4 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-wrap items-center gap-4 justify-between">
@@ -187,7 +192,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Graph + Country */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[400px]">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[470px]">
           <div className="lg:col-span-2 h-full">
             <TrafficChart
               data={data}

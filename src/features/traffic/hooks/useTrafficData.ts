@@ -3,8 +3,10 @@ import {
   fetchAnalyticsData,
   fetchHeadlines,
   processDataForDashboard,
+  fetchPageMappings,
 } from "@/lib/api";
 import { AggregatedPageData, BackendMetric, HeadlineData } from "@/types";
+import { MappingEntry } from "@/data/page-mapping";
 import {
   format,
   subDays,
@@ -21,6 +23,7 @@ export function useTrafficData() {
   const [data, setData] = useState<AggregatedPageData[]>([]);
   const [rawData, setRawData] = useState<BackendMetric[]>([]);
   const [headlines, setHeadlines] = useState<HeadlineData | null>(null);
+  const [mappings, setMappings] = useState<MappingEntry[]>([]);
   const [loading, setLoading] = useState(false);
 
   const getSmartStartDate = () => {
@@ -84,18 +87,21 @@ export function useTrafficData() {
     setLoading(true);
     const utmSource = platform === "Facebook" ? "fb" : "threads";
 
-    const [fetchedRaw, fetchedHeadlines] = await Promise.all([
+    const [fetchedRaw, fetchedHeadlines, fetchedMappings] = await Promise.all([
       fetchAnalyticsData(startDate, endDate, utmSource),
       fetchHeadlines(utmSource),
+      fetchPageMappings(),
     ]);
 
     setRawData(fetchedRaw);
     setHeadlines(fetchedHeadlines);
+    setMappings(fetchedMappings);
 
     const processed = processDataForDashboard(
       fetchedRaw,
       platform,
       selectedCampaign,
+      fetchedMappings,
     );
     processed.sort((a, b) => b.totals.sessions - a.totals.sessions);
     setData(processed);
@@ -113,13 +119,14 @@ export function useTrafficData() {
         rawData,
         platform,
         selectedCampaign,
+        mappings,
       );
       processed.sort((a, b) => b.totals.sessions - a.totals.sessions);
       setData(processed);
     } else {
       setData([]);
     }
-  }, [selectedCampaign, platform]);
+  }, [selectedCampaign, platform, rawData, mappings]);
 
   const dateHeaders = useMemo(() => {
     try {

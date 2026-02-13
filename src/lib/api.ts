@@ -1,26 +1,32 @@
 import { AggregatedPageData, BackendMetric, HeadlineData } from "@/types";
 import axios from "axios";
-import { PAGE_MAPPING_DATA, MappingEntry } from "@/data/page-mapping";
+import { MappingEntry } from "@/data/page-mapping";
 
 const API_BASE_URL = "http://localhost:4000/v1/analytics";
+const MAPPINGS_URL = "http://localhost:4000/page-mappings";
 
 interface PageInfo {
   pageName: string;
   category: string;
 }
 
-const MAPPING_LOOKUP: Record<string, PageInfo> = {};
+export async function fetchPageMappings(): Promise<MappingEntry[]> {
+  try {
+    const response = await axios.get(MAPPINGS_URL);
+    return response.data;
+  } catch (error) {
+    console.error("Mapping Fetch Error:", error);
+    return [];
+  }
+}
 
-PAGE_MAPPING_DATA.forEach((entry: MappingEntry) => {
-  entry.utmMediums.forEach((medium) => {
-    MAPPING_LOOKUP[medium] = {
-      pageName: entry.pageName,
-      category: entry.category,
-    };
-  });
-});
+export async function createPageMapping(mapping: MappingEntry) {
+  return axios.post(MAPPINGS_URL, mapping);
+}
 
-// API FUNCTIONS
+export async function deletePageMapping(id: number) {
+  return axios.delete(`${MAPPINGS_URL}/${id}`);
+}
 
 export async function fetchHeadlines(
   source?: string,
@@ -61,14 +67,25 @@ export function processDataForDashboard(
   rawData: BackendMetric[],
   platform: "Facebook" | "Threads",
   selectedCampaign: string,
+  mappingData: MappingEntry[],
 ): AggregatedPageData[] {
+  const mappingLookup: Record<string, PageInfo> = {};
+  mappingData.forEach((entry) => {
+    entry.utmMediums.forEach((medium) => {
+      mappingLookup[medium] = {
+        pageName: entry.pageName,
+        category: entry.category,
+      };
+    });
+  });
+
   const grouped: Record<string, AggregatedPageData> = {};
 
   rawData.forEach((row) => {
     if (selectedCampaign && row.utm_campaign !== selectedCampaign) return;
 
     const rawMedium = row.utm_medium || "";
-    const mappedInfo = MAPPING_LOOKUP[rawMedium];
+    const mappedInfo = mappingLookup[rawMedium];
 
     const pageName = mappedInfo ? mappedInfo.pageName : rawMedium;
     const category = mappedInfo ? mappedInfo.category : "Other";

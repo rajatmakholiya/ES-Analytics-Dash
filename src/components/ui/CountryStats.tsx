@@ -32,7 +32,7 @@ export function CountryStats({ rawData }: CountryStatsProps) {
       <div className="space-y-4 overflow-y-auto flex-1 pr-2 custom-scrollbar">
         {countryData.map((item) => (
           <div key={item.label}>
-            <div className="flex justify-between text-sm mb-1">
+            <div className="flex justify-between text-sm mb-0.5">
               <span
                 className="font-medium text-gray-700 dark:text-gray-300 truncate pr-4"
                 title={item.label}

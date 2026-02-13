@@ -1,7 +1,8 @@
 import { useState, useMemo } from "react";
 import { AggregatedPageData } from "@/types";
 import { format, parseISO } from "date-fns";
-import { BarChart3 } from "lucide-react";
+import { BarChart3, Settings, Download } from "lucide-react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 interface TrafficTableProps {
@@ -91,6 +92,65 @@ export function TrafficTable({ data, dateHeaders }: TrafficTableProps) {
     return dayData[gridMetric] || 0;
   };
 
+  // CSV Export Handler
+  const handleExportCSV = () => {
+    if (!groupedData.length) return;
+
+    const headers = [
+      "Category",
+      "Page Name",
+      "Total Sessions",
+      "Total Users",
+      "Total Pageviews",
+      "Avg Engagement Rate",
+      ...dateHeaders.map((d) => `${d} (${gridMetric})`),
+    ];
+
+    const csvRows = [headers.join(",")];
+
+    groupedData.forEach(([category, { rows }]) => {
+      rows.forEach((row) => {
+        const rowData = [
+          `"${category}"`,
+          `"${row.pageName}"`,
+          row.totals.sessions,
+          row.totals.users,
+          row.totals.pageviews,
+          `"${(row.totals.engagement_rate_avg * 100).toFixed(2)}%"`,
+        ];
+
+        dateHeaders.forEach((date) => {
+          const dayData = row.dailyTrend.find((d) => d.date === date);
+          if (!dayData) {
+            rowData.push("0");
+          } else {
+            if (gridMetric === "engagement_rate") {
+              rowData.push(`"${(dayData.engagement_rate * 100).toFixed(1)}%"`);
+            } else {
+              rowData.push(String(dayData[gridMetric] || 0));
+            }
+          }
+        });
+
+        csvRows.push(rowData.join(","));
+      });
+    });
+
+    const blob = new Blob([csvRows.join("\n")], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `traffic_export_${format(new Date(), "yyyy-MM-dd")}.csv`,
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col h-full max-h-[600px]">
       {/* Header */}
@@ -102,9 +162,27 @@ export function TrafficTable({ data, dateHeaders }: TrafficTableProps) {
           <h3 className="font-bold text-gray-800 dark:text-gray-100 text-lg">
             Detailed Breakdown
           </h3>
+
+          <div className="flex items-center border-l border-gray-200 dark:border-gray-700 pl-2 ml-2 space-x-1">
+            <Link
+              href="/settings"
+              className="p-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              title="Manage Page Mappings"
+            >
+              <Settings className="w-4 h-4" />
+            </Link>
+          </div>
         </div>
 
-        <div className="flex bg-gray-100 dark:bg-gray-800 p-1.5 rounded-xl border border-gray-200 dark:border-gray-700">
+        <div className="flex bg-gray-100 dark:bg-gray-800 p-1.5 rounded-xl border border-gray-200 dark:border-gray-700 gap-2">
+          <button
+            onClick={handleExportCSV}
+            className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors shadow-sm"
+          >
+            <Download className="w-4 h-4" />
+            <span className="hidden sm:inline">Export CSV</span>
+          </button>
+          
           {(["sessions", "users", "pageviews", "engagement_rate"] as const).map(
             (m) => (
               <button
@@ -124,7 +202,7 @@ export function TrafficTable({ data, dateHeaders }: TrafficTableProps) {
         </div>
       </div>
 
-      {/* Scrollable Table Area */}
+      {/* Table Area */}
       <div className="overflow-auto flex-1 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
         <table className="w-full text-sm text-left">
           <thead className="text-xs text-gray-500 dark:text-gray-400 uppercase bg-gray-50 dark:bg-gray-800/80 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30 shadow-sm backdrop-blur-md">
