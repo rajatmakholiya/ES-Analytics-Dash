@@ -24,7 +24,7 @@ export function useTrafficData() {
   const [rawData, setRawData] = useState<BackendMetric[]>([]);
   const [headlines, setHeadlines] = useState<HeadlineData | null>(null);
   const [mappings, setMappings] = useState<MappingEntry[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const getSmartStartDate = () => {
     const yesterday = subDays(new Date(), 1);

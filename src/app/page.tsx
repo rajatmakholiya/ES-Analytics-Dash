@@ -75,11 +75,11 @@ export default function DashboardPage() {
 
       <div className="max-w-[95%] mx-auto px-4 py-8 space-y-6">
         {/* Headlines */}
-        <Headlines 
-          data={headlines} 
-          loading={loading} 
-          rawData={rawData} 
-          mappedSessions={stats.sessions} 
+        <Headlines
+          data={headlines}
+          loading={loading}
+          rawData={rawData}
+          mappedSessions={stats.sessions}
         />
 
         {/* Filters Bar */}
@@ -162,18 +162,21 @@ export default function DashboardPage() {
             value={stats.sessions.toLocaleString()}
             icon={MousePointer2}
             colorClass="bg-blue-500"
+            loading={loading}
           />
           <StatCard
             title="Users"
             value={stats.users.toLocaleString()}
             icon={Users}
             colorClass="bg-indigo-500"
+            loading={loading}
           />
           <StatCard
             title="Pageviews"
             value={stats.pageviews.toLocaleString()}
             icon={Eye}
             colorClass="bg-emerald-500"
+            loading={loading}
           />
           <StatCard
             title="Engagement"
@@ -182,17 +185,27 @@ export default function DashboardPage() {
             }
             icon={Activity}
             colorClass="bg-amber-500"
+            loading={loading}
           />
           <StatCard
             title="Recurring"
             value={stats.recurring_users?.toLocaleString() || "0"}
             icon={UserCheck}
             colorClass="bg-purple-500"
+            loading={loading}
           />
         </div>
 
         {/* Graph + Country */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[470px]">
+          {loading && (
+            <div className="absolute inset-0 z-10 bg-gray-50/60 dark:bg-black/40 backdrop-blur-[2px] flex items-center justify-center rounded-2xl">
+              <div className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-lg flex items-center gap-3">
+                <RefreshCcw className="w-5 h-5 text-blue-500 animate-spin" />
+                <span className="font-medium">Loading metrics...</span>
+              </div>
+            </div>
+          )}
           <div className="lg:col-span-2 h-full">
             <TrafficChart
               data={data}
