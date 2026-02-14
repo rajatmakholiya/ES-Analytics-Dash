@@ -2,8 +2,16 @@ import { AggregatedPageData, BackendMetric, HeadlineData } from "@/types";
 import axios from "axios";
 import { MappingEntry } from "@/data/page-mapping";
 
-const API_BASE_URL = "http://localhost:4000/v1/analytics";
-const MAPPINGS_URL = "http://localhost:4000/page-mappings";
+const BASE_URL =
+  process.env.NEXT_PUBLIC_ANALYTICS_API_BASE_URL || "http://localhost:4000";
+const API_BASE_URL = `${BASE_URL}/v1/analytics`;
+const MAPPINGS_URL = `${BASE_URL}/page-mappings`;
+
+const apiClient = axios.create({
+  headers: {
+    "x-api-key": process.env.NEXT_PUBLIC_ANALYTICS_API_KEY || "",
+  },
+});
 
 interface PageInfo {
   pageName: string;
@@ -12,7 +20,7 @@ interface PageInfo {
 
 export async function fetchPageMappings(): Promise<MappingEntry[]> {
   try {
-    const response = await axios.get(MAPPINGS_URL);
+    const response = await apiClient.get(MAPPINGS_URL);
     return response.data;
   } catch (error) {
     console.error("Mapping Fetch Error:", error);
