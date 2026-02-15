@@ -11,6 +11,7 @@ import {
   Calendar,
   ChevronRight,
   X,
+  Database,
   UserCheck,
 } from "lucide-react";
 import { useTrafficData } from "@/features/traffic/hooks/useTrafficData";
@@ -33,6 +34,7 @@ export default function DashboardPage() {
     options,
     stats,
     refresh,
+    sync,
   } = useTrafficData();
 
   return (
@@ -144,15 +146,27 @@ export default function DashboardPage() {
             )}
           </div>
 
-          <button
-            onClick={refresh}
-            className="ml-auto flex items-center gap-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-black dark:hover:bg-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 transition-all shadow-lg shadow-gray-200 dark:shadow-none active:scale-95"
-          >
-            <RefreshCcw
-              className={cn("w-3.5 h-3.5", loading && "animate-spin")}
-            />
-            Refresh
-          </button>
+          <div className="ml-auto flex items-center gap-3">
+            <button
+              onClick={sync.handleSync}
+              disabled={sync.isSyncing}
+              className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 border border-blue-200 dark:border-blue-800 font-medium rounded-lg text-sm px-4 py-2.5 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+            >
+              <Database
+                className={cn("w-3.5 h-3.5", sync.isSyncing && "animate-pulse")}
+              />
+              {sync.isSyncing ? "Syncing..." : "Sync BQ"}
+            </button>
+            <button
+              onClick={refresh}
+              className="ml-auto flex items-center gap-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-black dark:hover:bg-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 transition-all shadow-lg shadow-gray-200 dark:shadow-none active:scale-95"
+            >
+              <RefreshCcw
+                className={cn("w-3.5 h-3.5", loading && "animate-spin")}
+              />
+              Refresh
+            </button>
+          </div>
         </div>
 
         {/* KPIs */}

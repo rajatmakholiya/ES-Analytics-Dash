@@ -50,6 +50,16 @@ export async function fetchHeadlines(
   }
 }
 
+export async function triggerManualSync() {
+  try {
+    const response = await apiClient.post(`${API_BASE_URL}/sync/manual`);
+    return response.data;
+  } catch (error) {
+    console.error("Sync Error:", error);
+    throw error;
+  }
+}
+
 export async function fetchAnalyticsData(
   startDate: string,
   endDate: string,

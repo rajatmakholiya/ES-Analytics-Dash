@@ -4,6 +4,7 @@ import {
   fetchHeadlines,
   processDataForDashboard,
   fetchPageMappings,
+  triggerManualSync,
 } from "@/lib/api";
 import { AggregatedPageData, BackendMetric, HeadlineData } from "@/types";
 import { MappingEntry } from "@/data/page-mapping";
@@ -25,6 +26,7 @@ export function useTrafficData() {
   const [headlines, setHeadlines] = useState<HeadlineData | null>(null);
   const [mappings, setMappings] = useState<MappingEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const getSmartStartDate = () => {
     const yesterday = subDays(new Date(), 1);
@@ -109,6 +111,19 @@ export function useTrafficData() {
     setLoading(false);
   };
 
+  const handleSync = async () => {
+    setIsSyncing(true);
+    try {
+      await triggerManualSync();
+      await loadData();
+    } catch (error) {
+      console.error("Failed to sync data");
+      alert("Failed to sync BigQuery data. Check console for details.");
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   useEffect(() => {
     loadData();
   }, [platform, startDate, endDate]);
@@ -188,5 +203,6 @@ export function useTrafficData() {
     options: { dateHeaders, availableCampaigns },
     stats: globalStats,
     refresh: loadData,
+    sync: { isSyncing, handleSync },
   };
 }
