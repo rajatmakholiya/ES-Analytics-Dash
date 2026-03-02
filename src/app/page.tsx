@@ -14,17 +14,26 @@ import {
   Database,
   UserCheck,
 } from "lucide-react";
-import { useTrafficData } from "@/features/traffic/hooks/useTrafficData";
-import { TrafficChart } from "@/features/traffic/components/TrafficChart";
-import { TrafficTable } from "@/features/traffic/components/TrafficTable";
+import { useEffect, useState } from "react";
+// import { useTrafficData } from "@/features/traffic/hooks/useTrafficData";
+// import { TrafficChart } from "@/features/traffic/components/TrafficChart";
+// import { TrafficTable } from "@/features/traffic/components/TrafficTable";
 import { StatCard } from "@/components/ui/StatCard";
 import { PlatformTab } from "@/components/ui/PlatformTab";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { Headlines } from "@/components/ui/Headlines";
 import { cn } from "@/lib/utils";
 import { CountryStats } from "@/components/ui/CountryStats";
+import { TrafficChart } from "@/features/traffic/components/TrafficChart";
+import { TrafficTable } from "@/features/traffic/components/TrafficTable";
+import { useTrafficData } from "@/features/traffic/hooks/useTrafficData";
 
 export default function DashboardPage() {
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const {
     data,
     rawData,
@@ -37,6 +46,13 @@ export default function DashboardPage() {
     sync,
   } = useTrafficData();
 
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gray-50/50 dark:bg-black/20 flex items-center justify-center">
+        <div className="animate-pulse">Loading...</div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-gray-50/50 dark:bg-black/20 text-gray-800 dark:text-gray-200 font-sans pb-20">
       {/* Top Navigation */}
